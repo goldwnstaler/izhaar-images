@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IZHAAR — Магазин продуктов</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Inter', sans-serif; background-color: #f7f8fa; color: #1a1a1a; padding-bottom: 50px; }
+        header { background-color: #ffffff; box-shadow: 0 2px 10px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
+        .header-container { max-width: 1200px; margin: 0 auto; padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logo { font-size: 26px; font-weight: 800; color: #2c3e50; letter-spacing: 2px; text-transform: uppercase; }
+        .logo span { color: #e74c3c; }
+        .header-right { display: flex; align-items: center; gap: 20px; }
+        .cart-icon { font-size: 24px; cursor: pointer; position: relative; color: #555; }
+        .cart-badge { position: absolute; top: -5px; right: -8px; background: #e74c3c; color: white; font-size: 11px; font-weight: bold; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .banner { max-width: 1200px; margin: 20px auto; padding: 0 20px; }
+        .banner-inner { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border-radius: 16px; padding: 40px; color: white; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 10px 20px rgba(30, 60, 114, 0.2); }
+        .banner-text h1 { font-size: 32px; font-weight: 700; margin-bottom: 10px; }
+        .banner-text p { font-size: 16px; opacity: 0.9; }
+        .banner-btn { background: white; color: #1e3c72; border: none; padding: 12px 24px; border-radius: 8px; font-weight: 600; font-size: 16px; cursor: pointer; transition: 0.3s; }
+        .banner-btn:hover { background: #f0f0f0; transform: translateY(-2px); }
+        .section-title { max-width: 1200px; margin: 40px auto 20px; padding: 0 20px; font-size: 24px; font-weight: 700; color: #2c3e50; }
+        .products-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+        .product-card { background: white; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.06); transition: transform 0.2s, box-shadow 0.2s; display: flex; flex-direction: column; position: relative; }
+        .product-card:hover { transform: translateY(-4px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+        .product-img { width: 100%; height: 200px; object-fit: cover; background-color: #f0f0f0; }
+        .product-info { padding: 15px; display: flex; flex-direction: column; flex-grow: 1; }
+        .product-name { font-size: 16px; font-weight: 600; color: #333; margin-bottom: 8px; text-transform: capitalize; }
+        .product-price { font-size: 22px; font-weight: 800; color: #e74c3c; margin-top: auto; }
+        .product-price span { font-size: 14px; font-weight: 500; color: #888; }
+        .delete-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.9); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; color: #e74c3c; font-size: 16px; font-weight: bold; display: flex; align-items: center; justify-content: center; opacity: 0; transition: 0.2s; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .product-card:hover .delete-btn { opacity: 1; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: none; align-items: center; justify-content: center; z-index: 1000; padding: 20px; }
+        .modal-overlay.active { display: flex; }
+        .modal { background: white; border-radius: 16px; width: 100%; max-width: 450px; padding: 30px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: slideUp 0.3s ease; }
+        @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .modal h3 { font-size: 22px; margin-bottom: 20px; color: #2c3e50; text-align: center; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 6px; font-weight: 500; font-size: 14px; color: #555; }
+        .form-group input { width: 100%; padding: 12px 14px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; transition: 0.2s; font-family: 'Inter', sans-serif; }
+        .form-group input:focus { outline: none; border-color: #2a5298; box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1); }
+        .file-preview { width: 100%; height: 150px; object-fit: contain; background: #f7f8fa; border-radius: 8px; margin-top: 8px; display: none; border: 1px dashed #ddd; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; }
+        .btn-primary { flex: 1; background: #2a5298; color: white; border: none; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-primary:hover { background: #1e3c72; }
+        .btn-primary:disabled { background: #999; cursor: not-allowed; }
+        .btn-secondary { flex: 1; background: #f0f0f0; color: #555; border: none; padding: 12px; border-radius: 8px; font-size: 15px; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .btn-secondary:hover { background: #e0e0e0; }
+        .loading { text-align: center; padding: 40px; color: #888; font-size: 16px; }
+        @media (max-width: 768px) {
+            .products-grid { grid-template-columns: 1fr; }
+            .banner-inner { flex-direction: column; text-align: center; gap: 20px; padding: 30px 20px; }
+            .banner-text h1 { font-size: 24px; }
+            .logo { font-size: 20px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-container">
+            <div class="logo">IZHAAR<span>.</span></div>
+            <div class="header-right">
+                <div class="cart-icon">🛒<span class="cart-badge" id="cartCount">0</span></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="banner">
+        <div class="banner-inner">
+            <div class="banner-text">
+                <h1>Свежие продукты каждый день</h1>
+                <p>Лучшие цены в городе. Доставка от 30 минут.</p>
+            </div>
+            <button class="banner-btn" onclick="openModal()">+ Добавить товар</button>
+        </div>
+    </div>
+
+    <h2 class="section-title">Каталог товаров</h2>
+
+    <div class="products-grid" id="productList">
+        <div class="loading" id="loadingMsg">Загрузка товаров...</div>
+    </div>
+
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h3>Добавить новый продукт</h3>
+            <div class="form-group">
+                <label>Название продукта</label>
+                <input type="text" id="prodName" placeholder="Например: Молоко 3.2%">
+            </div>
+            <div class="form-group">
+                <label>Цена (в сомах)</label>
+                <input type="number" id="prodPrice" placeholder="Например: 45">
+            </div>
+            <div class="form-group">
+                <label>Картинка с компьютера</label>
+                <input type="file" id="prodFile" accept="image/*" onchange="previewImage(event)">
+                <img id="imgPreview" class="file-preview">
+            </div>
+            <div class="modal-actions">
+                <button class="btn-secondary" onclick="closeModal()">Отмена</button>
+                <button class="btn-primary" id="submitBtn" onclick="addProduct()">Добавить</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+        import { getDatabase, ref, onValue, push, remove } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js";
+
+        // ============================================
+        // ВСТАВЬ СВОЙ КОНФИГ ИЗ FIREBASE ЗДЕСЬ
+        // ============================================
+        const firebaseConfig = {
+            apiKey: "ТВОЙ_API_KEY",
+            authDomain: "ТВОЙ_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://ТВОЙ_PROJECT_ID-default-rtdb.firebaseio.com",
+            projectId: "ТВОЙ_PROJECT_ID",
+            storageBucket: "ТВОЙ_PROJECT_ID.appspot.com",
+            messagingSenderId: "ТВОЙ_SENDER_ID",
+            appId: "ТВОЙ_APP_ID"
+        };
+        // ============================================
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const storage = getStorage(app);
+        const productsRef = ref(db, 'products');
+
+        // ===== ПРЕВЬЮ КАРТИНКИ ПЕРЕД ЗАГРУЗКОЙ =====
+        window.previewImage = function(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('imgPreview');
+            if (file) {
+                preview.src = URL.createObjectURL(file);
+                preview.style.display = 'block';
+            } else {
+                preview.style.display = 'none';
+            }
+        };
+
+        // ===== ОТРИСОВКА ТОВАРОВ (реальное время) =====
+        const productList = document.getElementById('productList');
+        const loadingMsg = document.getElementById('loadingMsg');
+        const cartCount = document.getElementById('cartCount');
+
+        onValue(productsRef, (snapshot) => {
+            if (loadingMsg) loadingMsg.remove();
+            productList.innerHTML = '';
+
+            const data = snapshot.val();
+            if (!data) {
+                productList.innerHTML = '<div class="loading">Пока нет товаров. Добавь первый!</div>';
+                cartCount.textContent = '0';
+                return;
+            }
+
+            const products = Object.entries(data);
+
+            products.forEach(([key, product]) => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <button class="delete-btn" onclick="deleteProduct('${key}', '${product.imgPath || ''}')">×</button>
+                    <img src="${product.img || 'https://via.placeholder.com/400x300?text=No+Image'}" 
+                         alt="${product.name}" class="product-img" 
+                         onerror="this.src='https://via.placeholder.com/400x300?text=Error'">
+                    <div class="product-info">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-price">${product.price} <span>сом</span></div>
+                    </div>
+                `;
+                productList.appendChild(card);
+            });
+
+            cartCount.textContent = products.length;
+        }, (error) => {
+            console.error('Ошибка чтения Firebase:', error);
+            productList.innerHTML = `<div class="loading" style="color:#e74c3c;">Ошибка загрузки: ${error.message}</div>`;
+        });
+
+        // ===== ДОБАВЛЕНИЕ ТОВАРА (с загрузкой картинки) =====
+        window.addProduct = async function() {
+            const name = document.getElementById('prodName').value.trim();
+            const price = document.getElementById('prodPrice').value.trim();
+            const file = document.getElementById('prodFile').files[0];
+            const submitBtn = document.getElementById('submitBtn');
+
+            if (!name || !price) {
+                alert("Заполни название и цену!");
+                return;
+            }
+
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Загрузка...';
+
+            try {
+                let imgUrl = '';
+                let imgPath = '';
+
+                // Если выбран файл — загружаем его в Firebase Storage
+                if (file) {
+                    // Уникальное имя файла: timestamp + оригинальное имя
+                    const fileName = `products/${Date.now()}_${file.name}`;
+                    const fileRef = storageRef(storage, fileName);
+
+                    // Загружаем файл
+                    await uploadBytes(fileRef, file);
+
+                    // Получаем публичную ссылку на файл
+                    imgUrl = await getDownloadURL(fileRef);
+                    imgPath = fileName;
+                }
+
+                // Сохраняем товар в базу (со ссылкой на картинку)
+                await push(productsRef, { name, price, img: imgUrl, imgPath });
+
+                closeModal();
+            } catch (error) {
+                console.error('Ошибка:', error);
+                alert("Не удалось добавить товар: " + error.message);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Добавить';
+            }
+        };
+
+        // ===== УДАЛЕНИЕ ТОВАРА (и картинки тоже) =====
+        window.deleteProduct = async function(key, imgPath) {
+            if (!confirm("Удалить этот товар?")) return;
+            try {
+                // Удаляем картинку из Storage, если она там есть
+                if (imgPath) {
+                    try {
+                        await deleteObject(storageRef(storage, imgPath));
+                    } catch (e) {
+                        console.warn('Картинка не удалена:', e.message);
+                    }
+                }
+                // Удаляем запись из базы
+                await remove(ref(db, 'products/' + key));
+            } catch (error) {
+                console.error('Ошибка удаления:', error);
+                alert("Не удалось удалить товар: " + error.message);
+            }
+        };
+
+        // ===== МОДАЛЬНОЕ ОКНО =====
+        const modal = document.getElementById('modalOverlay');
+
+        window.openModal = function() {
+            modal.classList.add('active');
+            document.getElementById('prodName').focus();
+        };
+
+        window.closeModal = function() {
+            modal.classList.remove('active');
+            document.getElementById('prodName').value = '';
+            document.getElementById('prodPrice').value = '';
+            document.getElementById('prodFile').value = '';
+            document.getElementById('imgPreview').style.display = 'none';
+        };
+
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal();
+        });
+    </script>
+
+</body>
+</html>
